@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>💘 Ты будешь моей валентинкой?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(145deg, #ff3b5c 0%, #ff6b8b 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            position: relative;
+        }
+
+        .screen {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 30px 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            border: 3px solid white;
+            position: relative;
+            z-index: 100;
+        }
+
+        /* Экран с вопросом */
+        .question-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .heart-emoji {
+            font-size: 100px;
+            animation: pulse 1.2s infinite;
+            text-shadow: 0 0 30px rgba(255, 60, 100, 0.5);
+            line-height: 1;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c12f4a;
+            text-align: center;
+            line-height: 1.3;
+            margin-bottom: 10px;
+        }
+
+        /* Контейнер для кнопок - ВАЖНО для мобилок */
+        .buttons-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+            touch-action: pan-y pinch-zoom;
+        }
+
+        .btn {
+            padding: 18px 45px;
+            font-size: 26px;
+            font-weight: 700;
+            border: none;
+            border-radius: 60px;
+            cursor: pointer;
+            position: absolute;
+            touch-action: none;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+            border: 3px solid white;
+            box-shadow: 0 12px 0 rgba(0, 0, 0, 0.15);
+            transition: all 0.05s;
+            white-space: nowrap;
+        }
+
+        .btn-yes {
+            background: #ff4d6d;
+            color: white;
+            left: 10px;
+            box-shadow: 0 12px 0 #b3404a;
+        }
+
+        .btn-no {
+            background: #6b6b6b;
+            color: white;
+            right: 10px;
+            box-shadow: 0 12px 0 #3d3d3d;
+            z-index: 50;
+        }
+
+        .btn-yes:active {
+            transform: translateY(8px);
+            box-shadow: 0 4px 0 #b3404a;
+        }
+
+        /* Экран комплиментов */
+        .compliment-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .photo-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            border: 5px solid white;
+            background: #ffe0e5;
+        }
+
+        .photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .compliment-message {
+            font-size: 26px;
+            font-weight: 700;
+            color: #c12f4a;
+            text-align: center;
+            min-height: 90px;
+            padding: 15px 20px;
+            background: #fff0f3;
+            border-radius: 50px;
+            width: 100%;
+            border: 2px dashed #ff9eb5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-panel {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 22px;
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            border: 3px solid white;
+            box-shadow: 0 10px 0 #b3404a;
+            cursor: pointer;
+            transition: 0.05s;
+        }
+
+        .nav-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #b3404a;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            box-shadow: 0 8px 0 #b3404a;
+        }
+
+        .counter {
+            font-size: 20px;
+            color: #a1344a;
+            font-weight: 600;
+            background: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 2px solid #ffb6c1;
+        }
+
+        /* Экран с упрямым сообщением */
+        .stubborn-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .stubborn-emoji {
+            font-size: 80px;
+            margin: 10px 0;
+        }
+
+        .stubborn-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #c12f4a;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .stubborn-message {
+            font-size: 24px;
+            color: #ff4d6d;
+            text-align: center;
+            font-weight: 700;
+            padding: 20px;
+            background: #fff5f7;
+            border-radius: 40px;
+            border: 3px solid #ffb6c1;
+        }
+
+        .btn-huge {
+            width: 100%;
+            padding: 22px;
+            font-size: 28px;
+            background: #ff4d6d;
+            color: white;
+            border: 4px solid white;
+            border-radius: 70px;
+            font-weight: 800;
+            box-shadow: 0 15px 0 #b3404a;
+            margin-top: 20px;
+        }
+
+        .btn-huge:active {
+            transform: translateY(10px);
+            box-shadow: 0 5px 0 #b3404a;
+        }
+
+        @media (max-width: 400px) {
+            .screen { padding: 25px 18px; }
+            .title { font-size: 28px; }
+            .btn { padding: 16px 35px; font-size: 24px; }
+            .compliment-message { font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="screen" id="app">
+        <!-- ЭКРАН 1: ВОПРОС -->
+        <div id="questionScreen" class="question-screen">
+            <div class="heart-emoji">❤️</div>
+            <div class="title">Ты будешь моей валентинкой?</div>
+            
+            <div id="buttonContainer" class="buttons-container">
+                <button id="yesBtn" class="btn btn-yes">ДА! ❤️</button>
+                <button id="noBtn" class="btn btn-no">НЕТ</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 2: КОМПЛИМЕНТЫ С ФОТО -->
+        <div id="complimentScreen" class="compliment-screen">
+            <div class="photo-container">
+                <img id="photoImg" class="photo" src="" alt="Фото">
+            </div>
+            
+            <div id="complimentText" class="compliment-message"></div>
+            
+            <div id="counter" class="counter">1 / 8</div>
+            
+            <div class="nav-panel">
+                <button id="prevBtn" class="nav-btn" disabled>◀ Назад</button>
+                <button id="nextBtn" class="nav-btn">Вперёд ▶</button>
+            </div>
+        </div>
+
+        <!-- ЭКРАН 3: УПРЯМЫЙ ОТВЕТ (если нажали НЕТ) -->
+        <div id="stubbornScreen" class="stubborn-screen">
+            <div class="stubborn-emoji">😤💢</div>
+            <div class="stubborn-title">Ты реально подумала,<br>что я дам тебе нажать на НЕТ?!</div>
+            <div class="stubborn-message">Подумай еще раз ❤️</div>
+            <button id="finalYesBtn" class="btn-huge">ДА! СОГЛАСНА!</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ========== ТВОИ ФОТО И КОМПЛИМЕНТЫ ==========
+            // ИНСТРУКЦИЯ ПО ЗАМЕНЕ ФОТО:
+            // 1. Загрузи фото на imgbb.com или другой хостинг
+            // 2. Получи прямую ссылку (должна заканчиваться на .jpg/.png)
+            // 3. Вставь ссылку в кавычки вместо текущей
+            const compliments = [
+                { text: "Твоя улыбка — самое прекрасное, что я видел ✨", photo: "https://i.ibb.co/7k2q0zP/valentine1.jpg" },
+                { text: "У тебя глаза, в которых хочется утонуть 💕", photo: "https://i.ibb.co/f4LqWxK/valentine2.jpg" },
+                { text: "Ты невероятно красивая, внутри и снаружи 💖", photo: "https://i.ibb.co/qJzYsXv/valentine3.jpg" },
+                { text: "С тобой даже обычный день становится праздником 🎉", photo: "https://i.ibb.co/zHc8r0p/valentine4.jpg" },
+                { text: "Ты самая умная и интересная девушка 🌟", photo: "https://i.ibb.co/PG0L1t0/valentine5.jpg" },
+                { text: "Твой смех — лучшая музыка для моих ушей 🎵", photo: "https://i.ibb.co/6nkVyqM/valentine6.jpg" },
+                { text: "Я счастлив просто от того, что ты существуешь 💗", photo: "https://i.ibb.co/ZGYj9Fq/valentine7.jpg" },
+                { text: "Будь моей валентинкой сегодня и всегда 💘", photo: "https://i.ibb.co/6W2VQHt/valentine8.jpg" }
+            ];
+
+            // ========== ЭЛЕМЕНТЫ ==========
+            const questionScreen = document.getElementById('questionScreen');
+            const complimentScreen = document.getElementById('complimentScreen');
+            const stubbornScreen = document.getElementById('stubbornScreen');
+            
+            const noBtn = document.getElementById('noBtn');
+            const yesBtn = document.getElementById('yesBtn');
+            const buttonContainer = document.getElementById('buttonContainer');
+            
+            const photoImg = document.getElementById('photoImg');
+            const complimentText = document.getElementById('complimentText');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const counter = document.getElementById('counter');
+            
+            // ========== СОСТОЯНИЕ ==========
+            let currentIndex = 0;
+            let moveAttempts = 0;
+
+            // ========== МОБИЛЬНАЯ ВЕРСИЯ: ПЕРЕМЕЩЕНИЕ КНОПКИ ==========
+            function moveNoButton() {
+                const container = buttonContainer;
+                const btn = noBtn;
+                
+                // Получаем размеры контейнера
+                const containerRect = container.getBoundingClientRect();
+                const btnRect = btn.getBoundingClientRect();
+                
+                // Вычисляем безопасные границы
+                const maxX = containerRect.width - btnRect.width - 20;
+                const maxY = containerRect.height - btnRect.height - 20;
+                const minX = 20;
+                const minY = 20;
+                
+                // Генерируем случайную позицию
+                let newX = Math.floor(Math.random() * (maxX - minX + 1) + minX);
+                let newY = Math.floor(Math.random() * (maxY - minY + 1) + minY);
+                
+                // Применяем позицию
+                btn.style.position = 'absolute';
+                btn.style.left = newX + 'px';
+                btn.style.top = newY + 'px';
+                btn.style.right = 'auto';
+                
+                // Визуальная обратная связь
+                btn.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    btn.style.transform = 'scale(1)';
+                }, 150);
+                
+                moveAttempts++;
+                
+                // Если слишком много попыток - кнопка становится доброй
+                if (moveAttempts > 10) {
+                    btn.style.background = '#ff4d6d';
+                    btn.textContent = 'НУ ЛАДНО, ДА ❤️';
+                    btn.classList.add('btn-yes');
+                    btn.classList.remove('btn-no');
+                }
+            }
+
+            // ОБРАБОТЧИКИ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
+            noBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault(); // Важно! Предотвращает нажатие
+                e.stopPropagation();
+                moveNoButton();
+                return false;
+            });
+
+            noBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Если кнопка уже стала "доброй"
+                if (this.textContent.includes('НУ ЛАДНО')) {
+                    startCompliments();
+                    return;
+                }
+                
+                // Показываем упрямый экран
+                questionScreen.style.display = 'none';
+                stubbornScreen.style.display = 'flex';
+                
+                return false;
+            });
+
+            // ОБРАБОТЧИК ДЛЯ ПК (на всякий случай)
+            noBtn.addEventListener('mouseover', function(e) {
+                if (window.innerWidth > 768) { // Только на ПК
+                    moveNoButton();
+                }
+            });
+
+            // ========== КНОПКА ДА ==========
+            yesBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                startCompliments();
+            });
+
+            yesBtn.addEventListener('touchstart', function(e) {
+                // Разрешаем нажатие на ДА
+                return true;
+            });
+
+            // ========== ФИНАЛЬНАЯ КНОПКА ДА ==========
+            document.getElementById('finalYesBtn').addEventListener('click', function() {
+                startCompliments();
+            });
+
+            // ========== ЗАПУСК КОМПЛИМЕНТОВ ==========
+            function startCompliments() {
+                // Скрываем все экраны
+                questionScreen.style.display = 'none';
+                stubbornScreen.style.display = 'none';
+                
+                // Показываем экран комплиментов
+                complimentScreen.style.display = 'flex';
+                
+                // Сбрасываем индекс
+                currentIndex = 0;
+                updateCompliment();
+            }
+
+            // ========== ОБНОВЛЕНИЕ КОМПЛИМЕНТА ==========
+            function updateCompliment() {
+                const item = compliments[currentIndex];
+                
+                // Подставляем фото и текст
+                photoImg.src = item.photo;
+                photoImg.alt = item.text;
+                complimentText.textContent = item.text;
+                counter.textContent = `${currentIndex + 1} / ${compliments.length}`;
+                
+                // Управляем кнопками
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex === compliments.length - 1;
+            }
+
+            // ========== НАВИГАЦИЯ ==========
+            prevBtn.addEventListener('click', function() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateCompliment();
+                }
+            });
+
+            prevBtn.addEventListener('touchstart', function(e) {
+                if (currentIndex > 0) {
+                    e.preventDefault();
+                    currentIndex--;
+                    updateCompliment();
+                }
+            });
+
+            nextBtn.addEventListener('click', function() {
+                if (currentIndex < compliments.length - 1) {
+                    currentIndex++;
+                    updateCompliment();
+                }
+            });
+
+            nextBtn.addEventListener('touchstart', function(e) {
+                if (currentIndex < compliments.length - 1) {
+                    e.preventDefault();
+                    currentIndex++;
+                    updateCompliment();
+                }
+            });
+
+            // ========== ИНИЦИАЛИЗАЦИЯ ==========
+            // Убеждаемся, что кнопка НЕТ имеет позицию absolute с самого начала
+            noBtn.style.position = 'absolute';
+            noBtn.style.right = '20px';
+            noBtn.style.left = 'auto';
+            noBtn.style.top = '20px';
+            
+            // Показываем правильный экран
+            questionScreen.style.display = 'flex';
+            complimentScreen.style.display = 'none';
+            stubbornScreen.style.display = 'none';
+
+            // ========== ЗАГЛУШКИ ДЛЯ ФОТО ==========
+            // Если ссылки на фото не работают, показываем красивые заглушки
+            function setDefaultPhotos() {
+                const defaultPhotos = [
+                    "https://images.pexels.com/photos/1024960/pexels-photo-1024960.jpeg?w=600",
+                    "https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?w=600", 
+                    "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?w=600",
+                    "https://images.pexels.com/photos/1125049/pexels-photo-1125049.jpeg?w=600",
+                    "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?w=600",
+                    "https://images.pexels.com/photos/1269968/pexels-photo-1269968.jpeg?w=600",
+                    "https://images.pexels.com/photos/1398293/pexels-photo-1398293.jpeg?w=600",
+                    "https://images.pexels.com/photos/1485031/pexels-photo-1485031.jpeg?w=600"
+                ];
+                
+                // Если фото не загрузились, подставляем заглушки
+                for (let i = 0; i < compliments.length; i++) {
+                    compliments[i].photo = defaultPhotos[i];
+                }
+            }
+            
+            // Если фото не загружаются - раскомментируй следующую строку:
+            // setDefaultPhotos();
+        });
+    </script>
+</body>
+</html>
