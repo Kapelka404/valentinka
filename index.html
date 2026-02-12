@@ -532,18 +532,18 @@
                 
                 // 🎁 СЮРПРИЗ НА ПОСЛЕДНЕМ СЛАЙДЕ!
                 if (currentIndex === compliments.length - 1) {
-                    const surpriseBadge = document.createElement('div');
-                    surpriseBadge.className = 'surprise-badge';
-                    surpriseBadge.innerHTML = '🎁 СЮРПРИЗ! 🎁';
-                    photoContainer.appendChild(surpriseBadge);
-                    
-                    omplimentText.innerHTML = item.text;
-                    
-                    confetti({
-                        particleCount: 40,
-                        spread: 50,
-                        origin: { y: 0.7 }
-                    });
+    // const surpriseBadge = document.createElement('div');
+    // surpriseBadge.className = 'surprise-badge';
+    // surpriseBadge.innerHTML = '🎁 СЮРПРИЗ! 🎁';
+    // photoContainer.appendChild(surpriseBadge);
+    
+    complimentText.innerHTML = item.text;
+    
+    confetti({
+        particleCount: 40,
+        spread: 50,
+        origin: { y: 0.7 }
+    });
                 }
                 
                 prevBtn.disabled = currentIndex === 0;
