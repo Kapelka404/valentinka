@@ -175,26 +175,6 @@
             display: block;
         }
 
-        /* Сюрприз на последнем слайде */
-        .surprise-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 77, 109, 0.95);
-            color: white;
-            padding: 12px 18px;
-            border-radius: 50px;
-            font-size: 20px;
-            font-weight: 700;
-            border: 3px solid white;
-            box-shadow: 0 8px 0 #b3404a;
-            animation: bounce 1.5s infinite;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            z-index: 200;
-        }
-
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-5px); }
@@ -530,15 +510,6 @@
                 
                 removeOldSurprise();
                 
-                // 🎁 СЮРПРИЗ НА ПОСЛЕДНЕМ СЛАЙДЕ!
-                if (currentIndex === compliments.length - 1) {
-    // const surpriseBadge = document.createElement('div');
-    // surpriseBadge.className = 'surprise-badge';
-    // surpriseBadge.innerHTML = '🎁 СЮРПРИЗ! 🎁';
-    // photoContainer.appendChild(surpriseBadge);
-    
-    complimentText.innerHTML = item.text;
-    
     confetti({
         particleCount: 40,
         spread: 50,
