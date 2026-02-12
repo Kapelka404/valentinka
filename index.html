@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>💘 Ты будешь моей валентинкой?</title>
+    
+    <!-- Библиотека конфетти -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
+    
     <style>
         * {
             margin: 0;
@@ -21,6 +25,32 @@
             align-items: center;
             padding: 12px;
             position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Плавающие сердечки */
+        #heaps {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .heap-heart {
+            position: absolute;
+            font-size: 24px;
+            opacity: 0.6;
+            animation: float 6s linear infinite;
+            user-select: none;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0.8); opacity: 0.7; }
+            100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
         }
 
         .screen {
@@ -65,7 +95,7 @@
             margin-bottom: 10px;
         }
 
-        /* Контейнер для кнопок - ВАЖНО для мобилок */
+        /* Контейнер для кнопок */
         .buttons-container {
             position: relative;
             width: 100%;
@@ -131,6 +161,7 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
             border: 5px solid white;
             background: #ffe0e5;
+            position: relative;
         }
 
         .photo {
@@ -138,6 +169,31 @@
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+
+        /* Сюрприз на последнем слайде */
+        .surprise-badge {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 77, 109, 0.95);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            border: 3px solid white;
+            box-shadow: 0 8px 0 #b3404a;
+            animation: bounce 1.5s infinite;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 200;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
 
         .compliment-message {
@@ -154,6 +210,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
         }
 
         .nav-panel {
@@ -255,10 +312,14 @@
             .title { font-size: 28px; }
             .btn { padding: 16px 35px; font-size: 24px; }
             .compliment-message { font-size: 24px; }
+            .surprise-badge { font-size: 18px; padding: 10px 16px; }
         }
     </style>
 </head>
 <body>
+    <!-- Фоновые плавающие сердечки -->
+    <div id="heaps"></div>
+
     <div class="screen" id="app">
         <!-- ЭКРАН 1: ВОПРОС -->
         <div id="questionScreen" class="question-screen">
@@ -273,13 +334,13 @@
 
         <!-- ЭКРАН 2: КОМПЛИМЕНТЫ С ФОТО -->
         <div id="complimentScreen" class="compliment-screen">
-            <div class="photo-container">
+            <div class="photo-container" id="photoContainer">
                 <img id="photoImg" class="photo" src="" alt="Фото">
             </div>
             
             <div id="complimentText" class="compliment-message"></div>
             
-            <div id="counter" class="counter">1 / 8</div>
+            <div id="counter" class="counter">1 / 6</div>
             
             <div class="nav-panel">
                 <button id="prevBtn" class="nav-btn" disabled>◀ Назад</button>
@@ -287,7 +348,7 @@
             </div>
         </div>
 
-        <!-- ЭКРАН 3: УПРЯМЫЙ ОТВЕТ (если нажали НЕТ) -->
+        <!-- ЭКРАН 3: УПРЯМЫЙ ОТВЕТ -->
         <div id="stubbornScreen" class="stubborn-screen">
             <div class="stubborn-emoji">😤💢</div>
             <div class="stubborn-title">Ты реально подумала,<br>что я дам тебе нажать на НЕТ?!</div>
@@ -299,17 +360,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // ========== ТВОИ ФОТО И КОМПЛИМЕНТЫ ==========
-            // ИНСТРУКЦИЯ ПО ЗАМЕНЕ ФОТО:
-            // 1. Загрузи фото на imgbb.com или другой хостинг
-            // 2. Получи прямую ссылку (должна заканчиваться на .jpg/.png)
-            // 3. Вставь ссылку в кавычки вместо текущей
             const compliments = [
                 { text: "Вода в бассейне с тобой теплее 🌟", photo: "https://s5.iimage.su/s/12/gpmmSl5x4z7qRkWjmFFkdLFvzJ5YTUBWDGcWdU1i.jpg" },
-                { text: "Хотдоги на заправках с тобой вкусее 🎉", photo: "https://s5.iimage.su/s/12/gbuQYWXx06zhYIBnI62lHy1fL7S8zMhzRV6u0s8E.jpg" },
+                { text: "Хотдоги на заправках с тобой вкуснее 🎉", photo: "https://s5.iimage.su/s/12/gbuQYWXx06zhYIBnI62lHy1fL7S8zMhzRV6u0s8E.jpg" },
                 { text: "Гулять иногда тоже не холодно ✨", photo: "https://s5.iimage.su/s/12/gcL0sWjxauY6oUKN5lXGsOUrMq0HZuY1L075G9YG.jpg" },
                 { text: "Ребра кстати тоже с тобой вкуснее 💕", photo: "https://s5.iimage.su/s/12/gjtkn6ixUQ7NniVbc8McqwVuOwfBq1d5cdiMN7ag.jpg" },
                 { text: "Когда ты зарулем, мне почти не страшно 💖", photo: "https://s5.iimage.su/s/12/gmOZLb6xPEj664YH9ECztClPPzR2RdoAiy66uZMP.jpg" },
-                { text: "А тут твой подарок, топай на вб и забирай. Люблю тебя! 💗", photo: "https://s5.iimage.su/s/12/gpmmSl5x4z7qRkWjmFFkdLFvzJ5YTUBWDGcWdU1i.jpg" },
+                { text: "🎁 А ТУТ ТВОЙ ПОДАРОК! 🎁\nТопай на WB и забирай.\nЛюблю тебя! 💗", photo: "https://s5.iimage.su/s/12/gpmmSl5x4z7qRkWjmFFkdLFvzJ5YTUBWDGcWdU1i.jpg" }
             ];
 
             // ========== ЭЛЕМЕНТЫ ==========
@@ -322,6 +379,7 @@
             const buttonContainer = document.getElementById('buttonContainer');
             
             const photoImg = document.getElementById('photoImg');
+            const photoContainer = document.getElementById('photoContainer');
             const complimentText = document.getElementById('complimentText');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
@@ -331,32 +389,50 @@
             let currentIndex = 0;
             let moveAttempts = 0;
 
+            // ========== ПЛАВАЮЩИЕ СЕРДЕЧКИ ==========
+            function createFloatingHearts() {
+                const container = document.getElementById('heaps');
+                const hearts = ['❤️', '🧡', '💛', '💚', '💙', '💜', '💕', '💞', '💗', '💖'];
+                
+                setInterval(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heap-heart';
+                    heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+                    heart.style.left = Math.random() * 100 + '%';
+                    heart.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                    heart.style.fontSize = (Math.random() * 20 + 20) + 'px';
+                    heart.style.opacity = Math.random() * 0.4 + 0.3;
+                    container.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 6000);
+                }, 300);
+            }
+            
+            createFloatingHearts();
+
             // ========== МОБИЛЬНАЯ ВЕРСИЯ: ПЕРЕМЕЩЕНИЕ КНОПКИ ==========
             function moveNoButton() {
                 const container = buttonContainer;
                 const btn = noBtn;
                 
-                // Получаем размеры контейнера
                 const containerRect = container.getBoundingClientRect();
                 const btnRect = btn.getBoundingClientRect();
                 
-                // Вычисляем безопасные границы
                 const maxX = containerRect.width - btnRect.width - 20;
                 const maxY = containerRect.height - btnRect.height - 20;
                 const minX = 20;
                 const minY = 20;
                 
-                // Генерируем случайную позицию
                 let newX = Math.floor(Math.random() * (maxX - minX + 1) + minX);
                 let newY = Math.floor(Math.random() * (maxY - minY + 1) + minY);
                 
-                // Применяем позицию
                 btn.style.position = 'absolute';
                 btn.style.left = newX + 'px';
                 btn.style.top = newY + 'px';
                 btn.style.right = 'auto';
                 
-                // Визуальная обратная связь
                 btn.style.transform = 'scale(0.9)';
                 setTimeout(() => {
                     btn.style.transform = 'scale(1)';
@@ -364,7 +440,6 @@
                 
                 moveAttempts++;
                 
-                // Если слишком много попыток - кнопка становится доброй
                 if (moveAttempts > 10) {
                     btn.style.background = '#ff4d6d';
                     btn.textContent = 'НУ ЛАДНО, ДА ❤️';
@@ -373,9 +448,8 @@
                 }
             }
 
-            // ОБРАБОТЧИКИ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ
             noBtn.addEventListener('touchstart', function(e) {
-                e.preventDefault(); // Важно! Предотвращает нажатие
+                e.preventDefault();
                 e.stopPropagation();
                 moveNoButton();
                 return false;
@@ -385,22 +459,19 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                // Если кнопка уже стала "доброй"
                 if (this.textContent.includes('НУ ЛАДНО')) {
                     startCompliments();
                     return;
                 }
                 
-                // Показываем упрямый экран
                 questionScreen.style.display = 'none';
                 stubbornScreen.style.display = 'flex';
                 
                 return false;
             });
 
-            // ОБРАБОТЧИК ДЛЯ ПК (на всякий случай)
             noBtn.addEventListener('mouseover', function(e) {
-                if (window.innerWidth > 768) { // Только на ПК
+                if (window.innerWidth > 768) {
                     moveNoButton();
                 }
             });
@@ -412,7 +483,6 @@
             });
 
             yesBtn.addEventListener('touchstart', function(e) {
-                // Разрешаем нажатие на ДА
                 return true;
             });
 
@@ -423,29 +493,55 @@
 
             // ========== ЗАПУСК КОМПЛИМЕНТОВ ==========
             function startCompliments() {
-                // Скрываем все экраны
                 questionScreen.style.display = 'none';
                 stubbornScreen.style.display = 'none';
-                
-                // Показываем экран комплиментов
                 complimentScreen.style.display = 'flex';
-                
-                // Сбрасываем индекс
                 currentIndex = 0;
                 updateCompliment();
+                
+                // 🎉 КОНФЕТТИ!
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            // ========== УДАЛЕНИЕ СТАРОГО СЮРПРИЗА ==========
+            function removeOldSurprise() {
+                const oldBadge = document.querySelector('.surprise-badge');
+                if (oldBadge) {
+                    oldBadge.remove();
+                }
             }
 
             // ========== ОБНОВЛЕНИЕ КОМПЛИМЕНТА ==========
             function updateCompliment() {
                 const item = compliments[currentIndex];
                 
-                // Подставляем фото и текст
                 photoImg.src = item.photo;
                 photoImg.alt = item.text;
                 complimentText.textContent = item.text;
                 counter.textContent = `${currentIndex + 1} / ${compliments.length}`;
                 
-                // Управляем кнопками
+                removeOldSurprise();
+                
+                // 🎁 СЮРПРИЗ НА ПОСЛЕДНЕМ СЛАЙДЕ!
+                if (currentIndex === compliments.length - 1) {
+                    const surpriseBadge = document.createElement('div');
+                    surpriseBadge.className = 'surprise-badge';
+                    surpriseBadge.innerHTML = '🎁 СЮРПРИЗ! 🎁';
+                    photoContainer.appendChild(surpriseBadge);
+                    
+                    complimentText.innerHTML = item.text + '<br><span style="font-size: 20px; margin-top: 15px; display: block; background: #ff4d6d; color: white; padding: 12px; border-radius: 40px; border: 2px solid white;">✨ ЗДЕСЬ БУДЕТ ТВОЙ QR-КОД ✨</span>';
+                    
+                    confetti({
+                        particleCount: 40,
+                        spread: 50,
+                        origin: { y: 0.7 }
+                    });
+                }
+                
                 prevBtn.disabled = currentIndex === 0;
                 nextBtn.disabled = currentIndex === compliments.length - 1;
             }
@@ -482,40 +578,16 @@
             });
 
             // ========== ИНИЦИАЛИЗАЦИЯ ==========
-            // Убеждаемся, что кнопка НЕТ имеет позицию absolute с самого начала
             noBtn.style.position = 'absolute';
             noBtn.style.right = '20px';
             noBtn.style.left = 'auto';
             noBtn.style.top = '20px';
             
-            // Показываем правильный экран
             questionScreen.style.display = 'flex';
             complimentScreen.style.display = 'none';
             stubbornScreen.style.display = 'none';
-
-            // ========== ЗАГЛУШКИ ДЛЯ ФОТО ==========
-            // Если ссылки на фото не работают, показываем красивые заглушки
-            function setDefaultPhotos() {
-                const defaultPhotos = [
-                    "https://images.pexels.com/photos/1024960/pexels-photo-1024960.jpeg?w=600",
-                    "https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg?w=600", 
-                    "https://images.pexels.com/photos/1239288/pexels-photo-1239288.jpeg?w=600",
-                    "https://images.pexels.com/photos/1125049/pexels-photo-1125049.jpeg?w=600",
-                    "https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?w=600",
-                    "https://images.pexels.com/photos/1269968/pexels-photo-1269968.jpeg?w=600",
-                    "https://images.pexels.com/photos/1398293/pexels-photo-1398293.jpeg?w=600",
-                    "https://images.pexels.com/photos/1485031/pexels-photo-1485031.jpeg?w=600"
-                ];
-                
-                // Если фото не загрузились, подставляем заглушки
-                for (let i = 0; i < compliments.length; i++) {
-                    compliments[i].photo = defaultPhotos[i];
-                }
-            }
-            
-            // Если фото не загружаются - раскомментируй следующую строку:
-            // setDefaultPhotos();
         });
     </script>
 </body>
+</html>
 </html>
