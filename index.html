@@ -427,7 +427,7 @@
             
             <div id="complimentText" class="compliment-message"></div>
             
-            <div id="counter" class="counter">1 / 6</div>
+            <div id="counter" class="counter">1 / 7</div>
             
             <div class="nav-panel">
                 <button id="prevBtn" class="nav-btn" disabled>◀ Назад</button>
@@ -507,6 +507,7 @@
             let score = 0;
             let attempts = 10;
             let gameHearts = [];
+            let gameCompleted = false;
 
             // ========== ПЛАВАЮЩИЕ СЕРДЕЧКИ ==========
             function createFloatingHearts() {
@@ -616,6 +617,7 @@
                 stubbornScreen.style.display = 'none';
                 complimentScreen.style.display = 'flex';
                 currentIndex = 0;
+                gameCompleted = false;
                 updateCompliment();
                 
                 confetti({
@@ -630,6 +632,7 @@
                 gameScreen.style.display = 'none';
                 complimentScreen.style.display = 'flex';
                 currentIndex = compliments.length - 1;
+                gameCompleted = true;
                 
                 const item = compliments[currentIndex];
                 photoImg.src = item.photo;
@@ -638,7 +641,7 @@
                 counter.textContent = `${currentIndex + 1} / ${compliments.length}`;
                 
                 prevBtn.disabled = currentIndex === 0;
-                nextBtn.disabled = currentIndex === compliments.length - 1;
+                nextBtn.disabled = true; // Блокируем кнопку "Вперёд" на последнем слайде
                 
                 // Финальное конфетти
                 confetti({
@@ -657,12 +660,12 @@
                 score = 0;
                 attempts = 10;
                 gameHearts = [];
+                gameActive = true;
                 updateGameStats();
                 
                 // Создаем сердечки
                 createGameHearts();
                 
-                gameActive = true;
                 gameNextBtn.disabled = true;
                 gameNextBtn.textContent = '❌ Порази 5 сердечек!';
             }
@@ -725,7 +728,15 @@
                         // Проверка победы
                         if (score >= 5) {
                             gameActive = false;
-                            showLastSlide(); // СРАЗУ ПОКАЗЫВАЕМ ПОСЛЕДНИЙ СЛАЙД!
+                            gameNextBtn.disabled = false;
+                            gameNextBtn.textContent = '🎁 ПОЛУЧИТЬ ПОДАРОК! 🎁';
+                            
+                            // Финальное конфетти победы
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
                         }
                     });
                     
@@ -773,8 +784,6 @@
             gameNextBtn.addEventListener('click', function() {
                 if (score >= 5) {
                     showLastSlide();
-                } else {
-                    startGame();
                 }
             });
 
@@ -798,13 +807,13 @@
                 removeOldSurprise();
                 
                 // Если дошли до предпоследнего слайда - показываем игру
-                if (currentIndex === compliments.length - 2) {
+                if (currentIndex === compliments.length - 1 && !gameCompleted) {
                     startGame();
                     return;
                 }
                 
                 prevBtn.disabled = currentIndex === 0;
-                nextBtn.disabled = currentIndex === compliments.length - 1;
+                nextBtn.disabled = (currentIndex === compliments.length - 1) || (currentIndex === compliments.length - 1 && !gameCompleted);
             }
 
             // ========== НАВИГАЦИЯ ==========
