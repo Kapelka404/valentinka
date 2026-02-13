@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>💘 Ты будешь моей валентинкой?</title>
     
@@ -175,11 +171,6 @@
             display: block;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-
         .compliment-message {
             font-size: 26px;
             font-weight: 700;
@@ -241,6 +232,118 @@
             border: 2px solid #ffb6c1;
         }
 
+        /* Экран игры */
+        .game-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #c12f4a;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .game-container {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #ffe0e5;
+            border-radius: 30px;
+            border: 5px solid white;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .cupid {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 40px;
+            z-index: 20;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+            animation: cupidFloat 2s infinite;
+        }
+
+        @keyframes cupidFloat {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-5px); }
+        }
+
+        .heart-target {
+            position: absolute;
+            font-size: 30px;
+            cursor: pointer;
+            animation: heartFloat 3s infinite;
+            user-select: none;
+            z-index: 10;
+            filter: drop-shadow(0 0 5px rgba(255,77,109,0.5));
+        }
+
+        @keyframes heartFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .arrow {
+            position: absolute;
+            font-size: 24px;
+            pointer-events: none;
+            z-index: 15;
+            animation: arrowFly 0.3s ease-out forwards;
+        }
+
+        @keyframes arrowFly {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.5); opacity: 0; }
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            font-size: 22px;
+            font-weight: 700;
+            color: #c12f4a;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: 2px solid #ffb6c1;
+        }
+
+        .game-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 24px;
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 700;
+            border: 3px solid white;
+            box-shadow: 0 10px 0 #b3404a;
+            cursor: pointer;
+            transition: 0.05s;
+        }
+
+        .game-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #b3404a;
+        }
+
+        .game-btn:disabled {
+            opacity: 0.5;
+            transform: none;
+            box-shadow: 0 8px 0 #b3404a;
+            pointer-events: none;
+        }
+
         /* Экран с упрямым сообщением */
         .stubborn-screen {
             display: none;
@@ -296,7 +399,7 @@
             .title { font-size: 28px; }
             .btn { padding: 16px 35px; font-size: 24px; }
             .compliment-message { font-size: 24px; }
-            .surprise-badge { font-size: 18px; padding: 10px 16px; }
+            .game-title { font-size: 20px; }
         }
     </style>
 </head>
@@ -332,7 +435,27 @@
             </div>
         </div>
 
-        <!-- ЭКРАН 3: УПРЯМЫЙ ОТВЕТ -->
+        <!-- ЭКРАН 3: МИНИ-ИГРА -->
+        <div id="gameScreen" class="game-screen">
+            <div class="game-title">
+                🏹 Чтобы получить подарок,<br>
+                порази 5 сердечек стрелой Купидона!
+            </div>
+            
+            <div class="game-container" id="gameContainer">
+                <div class="cupid" id="cupid">👼🏹</div>
+                <div id="heartsContainer"></div>
+            </div>
+            
+            <div class="game-stats">
+                <span>💘 <span id="score">0</span>/5</span>
+                <span>🎯 <span id="attempts">10</span></span>
+            </div>
+            
+            <button id="gameNextBtn" class="game-btn" disabled>❌ Порази 5 сердечек!</button>
+        </div>
+
+        <!-- ЭКРАН 4: УПРЯМЫЙ ОТВЕТ -->
         <div id="stubbornScreen" class="stubborn-screen">
             <div class="stubborn-emoji">😤💢</div>
             <div class="stubborn-title">Ты реально подумала,<br>что я дам тебе нажать на НЕТ?!</div>
@@ -350,12 +473,13 @@
                 { text: "Гулять иногда тоже не холодно ✨", photo: "https://s5.iimage.su/s/12/gcL0sWjxauY6oUKN5lXGsOUrMq0HZuY1L075G9YG.jpg" },
                 { text: "Ребра кстати тоже с тобой вкуснее 💕", photo: "https://s5.iimage.su/s/12/gjtkn6ixUQ7NniVbc8McqwVuOwfBq1d5cdiMN7ag.jpg" },
                 { text: "Когда ты зарулем, мне почти не страшно 💖", photo: "https://s5.iimage.su/s/12/gmOZLb6xPEj664YH9ECztClPPzR2RdoAiy66uZMP.jpg" },
-                { text: "🎁 А ТУТ ТВОЙ ПОДАРОК! 🎁\nТопай на WB и забирай.\nЛюблю тебя! 💗", photo: "https://s5.iimage.su/s/12/gRwsNbTxbXmIB7EXXWcNynZpHBsjtU4DdLmH1A5l.jpg" }
+                { text: "🎁 А ТУТ ТВОЙ ПОДАРОК! 🎁\nТопай на WB и забирай.\nЛюблю тебя! 💗", photo: "https://iimg.su/s/13/gmcr9ngx0ZzQ5qoa0jgFiTasJAlrPnJCnpgWpXll.jpg" }
             ];
 
             // ========== ЭЛЕМЕНТЫ ==========
             const questionScreen = document.getElementById('questionScreen');
             const complimentScreen = document.getElementById('complimentScreen');
+            const gameScreen = document.getElementById('gameScreen');
             const stubbornScreen = document.getElementById('stubbornScreen');
             
             const noBtn = document.getElementById('noBtn');
@@ -369,9 +493,20 @@
             const nextBtn = document.getElementById('nextBtn');
             const counter = document.getElementById('counter');
             
+            // Элементы игры
+            const gameContainer = document.getElementById('gameContainer');
+            const heartsContainer = document.getElementById('heartsContainer');
+            const scoreSpan = document.getElementById('score');
+            const attemptsSpan = document.getElementById('attempts');
+            const gameNextBtn = document.getElementById('gameNextBtn');
+            
             // ========== СОСТОЯНИЕ ==========
             let currentIndex = 0;
             let moveAttempts = 0;
+            let gameActive = false;
+            let score = 0;
+            let attempts = 10;
+            let gameHearts = [];
 
             // ========== ПЛАВАЮЩИЕ СЕРДЕЧКИ ==========
             function createFloatingHearts() {
@@ -483,13 +618,165 @@
                 currentIndex = 0;
                 updateCompliment();
                 
-                // 🎉 КОНФЕТТИ!
                 confetti({
                     particleCount: 100,
                     spread: 70,
                     origin: { y: 0.6 }
                 });
             }
+
+            // ========== ПОКАЗАТЬ ПОСЛЕДНИЙ СЛАЙД ==========
+            function showLastSlide() {
+                gameScreen.style.display = 'none';
+                complimentScreen.style.display = 'flex';
+                currentIndex = compliments.length - 1;
+                
+                const item = compliments[currentIndex];
+                photoImg.src = item.photo;
+                photoImg.alt = item.text;
+                complimentText.textContent = item.text;
+                counter.textContent = `${currentIndex + 1} / ${compliments.length}`;
+                
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex === compliments.length - 1;
+                
+                // Финальное конфетти
+                confetti({
+                    particleCount: 150,
+                    spread: 100,
+                    origin: { y: 0.6 }
+                });
+            }
+
+            // ========== ЗАПУСК ИГРЫ ==========
+            function startGame() {
+                complimentScreen.style.display = 'none';
+                gameScreen.style.display = 'flex';
+                
+                // Сброс игры
+                score = 0;
+                attempts = 10;
+                gameHearts = [];
+                updateGameStats();
+                
+                // Создаем сердечки
+                createGameHearts();
+                
+                gameActive = true;
+                gameNextBtn.disabled = true;
+                gameNextBtn.textContent = '❌ Порази 5 сердечек!';
+            }
+
+            // ========== СОЗДАНИЕ СЕРДЕЧЕК ДЛЯ ИГРЫ ==========
+            function createGameHearts() {
+                heartsContainer.innerHTML = '';
+                const heartEmojis = ['❤️', '🧡', '💛', '💚', '💙', '💜', '💕', '💞', '💗', '💖'];
+                
+                for (let i = 0; i < 5; i++) {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart-target';
+                    heart.innerHTML = heartEmojis[Math.floor(Math.random() * heartEmojis.length)];
+                    
+                    // Случайная позиция
+                    const left = 10 + Math.random() * 70;
+                    const top = 10 + Math.random() * 70;
+                    heart.style.left = left + '%';
+                    heart.style.top = top + '%';
+                    
+                    // Случайная анимация
+                    const duration = 2 + Math.random() * 3;
+                    heart.style.animation = `heartFloat ${duration}s infinite`;
+                    
+                    // Обработчик попадания
+                    heart.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        if (!gameActive) return;
+                        
+                        // Создаем стрелу
+                        const arrow = document.createElement('div');
+                        arrow.className = 'arrow';
+                        arrow.innerHTML = '🏹';
+                        arrow.style.left = '50%';
+                        arrow.style.bottom = '80px';
+                        gameContainer.appendChild(arrow);
+                        
+                        setTimeout(() => arrow.remove(), 300);
+                        
+                        // Увеличиваем счет
+                        score++;
+                        this.remove();
+                        
+                        // Удаляем из массива
+                        const index = gameHearts.indexOf(this);
+                        if (index > -1) gameHearts.splice(index, 1);
+                        
+                        updateGameStats();
+                        
+                        // Конфетти при попадании
+                        confetti({
+                            particleCount: 20,
+                            spread: 30,
+                            origin: { 
+                                x: (parseInt(this.style.left) / 100),
+                                y: (parseInt(this.style.top) / 100) 
+                            }
+                        });
+                        
+                        // Проверка победы
+                        if (score >= 5) {
+                            gameActive = false;
+                            showLastSlide(); // СРАЗУ ПОКАЗЫВАЕМ ПОСЛЕДНИЙ СЛАЙД!
+                        }
+                    });
+                    
+                    heartsContainer.appendChild(heart);
+                    gameHearts.push(heart);
+                }
+            }
+
+            // ========== ОБНОВЛЕНИЕ СТАТИСТИКИ ИГРЫ ==========
+            function updateGameStats() {
+                scoreSpan.textContent = score;
+                attemptsSpan.textContent = attempts;
+            }
+
+            // ========== ОБРАБОТЧИК КЛИКА ПО ИГРЕ ==========
+            gameContainer.addEventListener('click', function(e) {
+                if (!gameActive) return;
+                
+                // Проверяем, кликнули ли не по сердечку
+                if (!e.target.classList.contains('heart-target')) {
+                    attempts--;
+                    updateGameStats();
+                    
+                    // Создаем стрелу-промах
+                    const arrow = document.createElement('div');
+                    arrow.className = 'arrow';
+                    arrow.innerHTML = '🏹';
+                    arrow.style.left = e.clientX - gameContainer.getBoundingClientRect().left + 'px';
+                    arrow.style.top = e.clientY - gameContainer.getBoundingClientRect().top + 'px';
+                    gameContainer.appendChild(arrow);
+                    
+                    setTimeout(() => arrow.remove(), 300);
+                    
+                    if (attempts <= 0) {
+                        gameActive = false;
+                        // Перезапускаем игру
+                        setTimeout(() => {
+                            startGame();
+                        }, 500);
+                    }
+                }
+            });
+
+            // ========== КНОПКА ПОСЛЕ ИГРЫ ==========
+            gameNextBtn.addEventListener('click', function() {
+                if (score >= 5) {
+                    showLastSlide();
+                } else {
+                    startGame();
+                }
+            });
 
             // ========== УДАЛЕНИЕ СТАРОГО СЮРПРИЗА ==========
             function removeOldSurprise() {
@@ -510,11 +797,10 @@
                 
                 removeOldSurprise();
                 
-    confetti({
-        particleCount: 40,
-        spread: 50,
-        origin: { y: 0.7 }
-    });
+                // Если дошли до предпоследнего слайда - показываем игру
+                if (currentIndex === compliments.length - 2) {
+                    startGame();
+                    return;
                 }
                 
                 prevBtn.disabled = currentIndex === 0;
@@ -560,9 +846,9 @@
             
             questionScreen.style.display = 'flex';
             complimentScreen.style.display = 'none';
+            gameScreen.style.display = 'none';
             stubbornScreen.style.display = 'none';
         });
     </script>
 </body>
-</html>
 </html>
